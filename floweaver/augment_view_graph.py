@@ -5,6 +5,12 @@ from .ordering import new_node_indices, Ordering
 def elsewhere_bundles(sankey_definition):
     """Find new bundles and waypoints needed, so that every process group has a
     bundle to Elsewhere and a bundle from Elsewhere.
+
+    If a process group already has a bundle to/from Elsewhere, another one is
+    not added. However, if that bundle has a `flow_selection` defined, it might
+    not match everything. Then an un-restricted Bundle to/from Elsewhere is
+    added.
+
     """
 
     # Build set of existing bundles to/from elsewhere.
@@ -12,12 +18,12 @@ def elsewhere_bundles(sankey_definition):
     has_from_elsewhere = set()
     for bundle in sankey_definition.bundles.values():
         assert not (bundle.source is Elsewhere and bundle.target is Elsewhere)
-        if bundle.target is Elsewhere:
+        if bundle.target is Elsewhere and bundle.flow_selection is None:
             # XXX they might have different flow_selections?
             # if bundle.source in has_to_elsewhere:
             #     raise ValueError('duplicate bundles to elsewhere from {}'.format(bundle.source))
             has_to_elsewhere.add(bundle.source)
-        if bundle.source is Elsewhere:
+        if bundle.source is Elsewhere and bundle.flow_selection is None:
             # XXX they might have different flow_selections?
             # if bundle.target in has_from_elsewhere:
             #     raise ValueError('duplicate bundles from elsewhere to {}'.format(bundle.target))
